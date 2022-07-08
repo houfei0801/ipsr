@@ -10,7 +10,7 @@ iPSR extends the popular Poisson Surface Reconstruction ([https://github.com/mka
 
 ### Compilation
 Windows: The code is tested by Visual Studio. The ipsr.vcxproj is an example to configure the project.  
-Ubuntu: The code is tested by GCC with makefile.
+Linux: The code is tested by GCC and Clang with makefile.
 
 ### Usage:
 \-\-in &lt;input ply file name&gt;  

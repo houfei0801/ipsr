@@ -28,6 +28,7 @@ DAMAGE.
 
 #include <vector>
 #include <string>
+#include <climits>
 #include <fstream>
 #include "PointStream.h"
 #include "PointStreamData.h"
@@ -152,6 +153,11 @@ inline std::vector<std::string> split(const std::string& s, char c = ' ')
 	}
 
 	return str;
+}
+
+inline bool valid_parameter(long v)
+{
+	return v > 0 && v < INT_MAX;
 }
 
 #endif

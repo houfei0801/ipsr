@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <assert.h>
+#include <math.h>
 #include <numeric>
 #include <limits>
 #include <algorithm>

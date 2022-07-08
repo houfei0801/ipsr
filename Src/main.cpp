@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	int iters = 30;
 	double pointweight = 10;
 	int depth = 10;
-	int k_neighbor = 10;
+	int k_neighbors = 10;
 	for (int i = 1; i < argc; i += 2)
 	{
 		if (strcmp(argv[i], "--in") == 0)
@@ -70,11 +70,12 @@ int main(int argc, char *argv[])
 			}
 		}
 		else if (strcmp(argv[i], "--iters") == 0) {
-			iters = strtol(argv[i + 1], nullptr, 10);
-			if (iters <= 0 || iters == LONG_MAX || iters == LONG_MIN) {
+			long v = strtol(argv[i + 1], nullptr, 10);
+			if (!valid_parameter(v)) {
 				printf("invalid value of --iters");
 				return 0;
 			}
+			iters = static_cast<int>(v);
 		}
 		else if (strcmp(argv[i], "--pointWeight") == 0) {
 			pointweight = strtod(argv[i + 1], nullptr);
@@ -84,18 +85,20 @@ int main(int argc, char *argv[])
 			}
 		}
 		else if (strcmp(argv[i], "--depth") == 0) {
-			depth = strtol(argv[i + 1], nullptr, 10);
-			if (depth <= 0 || depth == LONG_MAX || depth == LONG_MIN) {
+			long v = strtol(argv[i + 1], nullptr, 10);
+			if (!valid_parameter(v)) {
 				printf("invalid value of --depth");
 				return 0;
 			}
+			depth = static_cast<int>(v);
 		}
 		else if (strcmp(argv[i], "--neighbors") == 0) {
-			k_neighbor = strtol(argv[i + 1], nullptr, 10);
-			if (k_neighbor <= 0 || k_neighbor == LONG_MAX || k_neighbor == LONG_MIN) {
+			long v = strtol(argv[i + 1], nullptr, 10);
+			if (!valid_parameter(v)) {
 				printf("invalid value of --neighbors");
 				return 0;
 			}
+			k_neighbors = static_cast<int>(v);
 		}
 		else {
 			printf("unknown parameter of %s\n", argv[i]);
@@ -125,7 +128,7 @@ int main(int argc, char *argv[])
 	printf("--iters       %d\n", iters);
 	printf("--pointWeight %f\n", pointweight);
 	printf("--depth       %d\n", depth);
-	printf("--neighbors   %d\n\n", k_neighbor);
+	printf("--neighbors   %d\n\n", k_neighbors);
 
 	string command = "PoissonRecon --in i.ply --out o.ply --bType 2 --depth " + to_string(depth) + " --pointWeight " + to_string(pointweight);
 	vector<string> cmd = split(command);
@@ -191,7 +194,7 @@ int main(int argc, char *argv[])
 				Point<REAL, DIM> c = mesh.first[mesh.second[i][0]] + mesh.first[mesh.second[i][1]] + mesh.first[mesh.second[i][2]];
 				c /= 3;
 				array<REAL, DIM> a{c[0], c[1], c[2]};
-				nearestSamples[i] = tree.knnSearch(kdt::KDTreePoint(a), k_neighbor);
+				nearestSamples[i] = tree.knnSearch(kdt::KDTreePoint(a), k_neighbors);
 				normals[i] = Point<REAL, DIM>::CrossProduct(mesh.first[mesh.second[i][1]] - mesh.first[mesh.second[i][0]], mesh.first[mesh.second[i][2]] - mesh.first[mesh.second[i][0]]);
 			}
 		}
