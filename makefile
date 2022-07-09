@@ -1,3 +1,4 @@
+#If use Clang, please change g++ to clang++
 CC = g++
 CFLAGS = -std=c++11 -O3 -fopenmp -w
 
