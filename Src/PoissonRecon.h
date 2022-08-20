@@ -2,7 +2,7 @@
 Copyright (c) 2022, Fei Hou and Chiyu Wang, Institute of Software, Chinese Academy of Sciences.
 All rights reserved.
 
-The codes can only be used for academic purpose, but cannot be used for commercial
+The codes can only be used for academic purpose, and cannot be used for commercial
 purpose without written permission.
 
 Redistribution and use in source for academic purpose, with or without modification,
