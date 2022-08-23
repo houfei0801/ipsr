@@ -33,7 +33,7 @@ DAMAGE.
 
 using namespace std;
 
-void ipsr(const string& input_name, const string& output_name, int iters, double pointweight, int depth, int k_neighbors)
+void ipsr(const string &input_name, const string &output_name, int iters, double pointweight, int depth, int k_neighbors)
 {
 	typedef double REAL;
 	const unsigned int DIM = 3U;
@@ -49,10 +49,10 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 
 	XForm<REAL, DIM + 1> iXForm;
 	vector<double> weight_samples;
-	//sample points by the octree
+	// sample points by the octree
 	points_normals = SamplePoints<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, iXForm, &weight_samples);
 
-	//initialize normals randomly
+	// initialize normals randomly
 	printf("random initialization...\n");
 	Normal<REAL, DIM> zero_normal(Point<REAL, DIM>(0, 0, 0));
 	srand(0);
@@ -65,14 +65,14 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 		normalize<REAL, DIM>(points_normals[i].second);
 	}
 
-	//construct the Kd-Tree
+	// construct the Kd-Tree
 	kdt::KDTree<kdt::KDTreePoint> tree;
 	{
 		vector<kdt::KDTreePoint> vertices;
 		vertices.reserve(points_normals.size());
 		for (size_t i = 0; i < points_normals.size(); ++i)
 		{
-			array<double, 3> p{ points_normals[i].first[0], points_normals[i].first[1], points_normals[i].first[2] };
+			array<double, 3> p{points_normals[i].first[0], points_normals[i].first[1], points_normals[i].first[2]};
 			vertices.push_back(kdt::KDTreePoint(p));
 		}
 		tree.build(vertices);
@@ -80,7 +80,7 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 
 	pair<vector<Point<REAL, DIM>>, vector<vector<int>>> mesh;
 
-	//iterations
+	// iterations
 	int epoch = 0;
 	while (epoch < iters)
 	{
@@ -90,13 +90,13 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 		vector<Point<REAL, DIM>>().swap(mesh.first);
 		vector<vector<int>>().swap(mesh.second);
 
-		//Poisson reconstruction
+		// Poisson reconstruction
 		mesh = poisson_reconstruction<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, &weight_samples);
 
 		vector<vector<int>> nearestSamples(mesh.second.size());
 		vector<Point<REAL, DIM>> normals(mesh.second.size());
 
-		//compute face normals and map them to sample points
+		// compute face normals and map them to sample points
 #pragma omp parallel for
 		for (int i = 0; i < (int)nearestSamples.size(); i++)
 		{
@@ -104,13 +104,13 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 			{
 				Point<REAL, DIM> c = mesh.first[mesh.second[i][0]] + mesh.first[mesh.second[i][1]] + mesh.first[mesh.second[i][2]];
 				c /= 3;
-				array<REAL, DIM> a{ c[0], c[1], c[2] };
+				array<REAL, DIM> a{c[0], c[1], c[2]};
 				nearestSamples[i] = tree.knnSearch(kdt::KDTreePoint(a), k_neighbors);
 				normals[i] = Point<REAL, DIM>::CrossProduct(mesh.first[mesh.second[i][1]] - mesh.first[mesh.second[i][0]], mesh.first[mesh.second[i][2]] - mesh.first[mesh.second[i][0]]);
 			}
 		}
 
-		//update sample point normals
+		// update sample point normals
 		vector<Normal<REAL, DIM>> projective_normals(points_normals.size(), zero_normal);
 		for (size_t i = 0; i < nearestSamples.size(); i++)
 		{
@@ -126,7 +126,7 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 		for (int i = 0; i < (int)projective_normals.size(); ++i)
 			normalize<REAL, DIM>(projective_normals[i]);
 
-		//compute the average normal variation of the top 1/1000 points
+		// compute the average normal variation of the top 1/1000 points
 		size_t heap_size = static_cast<size_t>(ceil(points_normals.size() / 1000.0));
 		priority_queue<double, vector<double>, greater<double>> min_heap;
 		for (size_t i = 0; i < points_normals.size(); ++i)
@@ -162,7 +162,7 @@ void ipsr(const string& input_name, const string& output_name, int iters, double
 	mesh = poisson_reconstruction<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, &weight_samples);
 
 	output_ply(output_name, mesh, iXForm);
-//	output_points_and_normals(result_path + "normals.ply", points_normals,iXForm);
+	// output_points_and_normals("points_normals.ply", points_normals, iXForm);
 }
 
 int main(int argc, char *argv[])
@@ -198,38 +198,47 @@ int main(int argc, char *argv[])
 				return 0;
 			}
 		}
-		else if (strcmp(argv[i], "--iters") == 0) {
+		else if (strcmp(argv[i], "--iters") == 0)
+		{
 			long v = strtol(argv[i + 1], nullptr, 10);
-			if (!valid_parameter(v)) {
+			if (!valid_parameter(v))
+			{
 				printf("invalid value of --iters");
 				return 0;
 			}
 			iters = static_cast<int>(v);
 		}
-		else if (strcmp(argv[i], "--pointWeight") == 0) {
+		else if (strcmp(argv[i], "--pointWeight") == 0)
+		{
 			pointweight = strtod(argv[i + 1], nullptr);
-			if (pointweight < 0.0 || pointweight == HUGE_VAL || pointweight == -HUGE_VAL) {
+			if (pointweight < 0.0 || pointweight == HUGE_VAL || pointweight == -HUGE_VAL)
+			{
 				printf("invalid value of --pointWeight");
 				return 0;
 			}
 		}
-		else if (strcmp(argv[i], "--depth") == 0) {
+		else if (strcmp(argv[i], "--depth") == 0)
+		{
 			long v = strtol(argv[i + 1], nullptr, 10);
-			if (!valid_parameter(v)) {
+			if (!valid_parameter(v))
+			{
 				printf("invalid value of --depth");
 				return 0;
 			}
 			depth = static_cast<int>(v);
 		}
-		else if (strcmp(argv[i], "--neighbors") == 0) {
+		else if (strcmp(argv[i], "--neighbors") == 0)
+		{
 			long v = strtol(argv[i + 1], nullptr, 10);
-			if (!valid_parameter(v)) {
+			if (!valid_parameter(v))
+			{
 				printf("invalid value of --neighbors");
 				return 0;
 			}
 			k_neighbors = static_cast<int>(v);
 		}
-		else {
+		else
+		{
 			printf("unknown parameter of %s\n", argv[i]);
 			return 0;
 		}
