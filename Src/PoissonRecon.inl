@@ -814,7 +814,7 @@ std::pair<std::vector<Point<Real, Dim>>, std::vector<std::vector<int>>> poisson_
 }
 
 template <class Real, unsigned int Dim, class StreamDataInfo>
-std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> _SamplePoints(int argc, char *argv[], const std::vector<std::pair<Point<Real, Dim>, typename StreamDataInfo::Type>> &points_normals, XForm<Real, Dim + 1> &iXForm, std::vector<double> *weight_samples)
+std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> _sample_points(int argc, char *argv[], const std::vector<std::pair<Point<Real, Dim>, typename StreamDataInfo::Type>> &points_normals, XForm<Real, Dim + 1> &iXForm, std::vector<double> *weight_samples)
 {
 	typedef typename FEMTree<Dim, Real>::template DensityEstimator<WEIGHT_DEGREE> DensityEstimator;
 	typedef typename FEMTree<Dim, Real>::template InterpolationInfo<Real, 0> InterpolationInfo;
@@ -920,7 +920,7 @@ std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> _SamplePoints(int ar
 	}
 }
 template <class Real, unsigned int Dim>
-std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> SamplePoints(int argc, char *argv[], const std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, XForm<Real, Dim + 1> &iXForm, std::vector<double> *weight_samples)
+std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> sample_points(int argc, char *argv[], const std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, XForm<Real, Dim + 1> &iXForm, std::vector<double> *weight_samples)
 {
 #ifdef ARRAY_DEBUG
 	fprintf(stderr, "[WARNING] Array debugging enabled\n");
@@ -949,5 +949,5 @@ std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> SamplePoints(int arg
 	if (!PointWeight.set)
 		PointWeight.value = DefaultPointWeightMultiplier * Degree.value;
 
-	return _SamplePoints<Real, Dim, NormalInfo<Real, Dim>>(argc, argv, points_normals, iXForm, weight_samples);
+	return _sample_points<Real, Dim, NormalInfo<Real, Dim>>(argc, argv, points_normals, iXForm, weight_samples);
 }

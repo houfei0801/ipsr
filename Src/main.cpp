@@ -50,7 +50,7 @@ void ipsr(const string &input_name, const string &output_name, int iters, double
 	XForm<REAL, DIM + 1> iXForm;
 	vector<double> weight_samples;
 	// sample points by the octree
-	points_normals = SamplePoints<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, iXForm, &weight_samples);
+	points_normals = sample_points<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, iXForm, &weight_samples);
 
 	// initialize normals randomly
 	printf("random initialization...\n");
@@ -162,7 +162,7 @@ void ipsr(const string &input_name, const string &output_name, int iters, double
 	mesh = poisson_reconstruction<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, &weight_samples);
 
 	output_ply(output_name, mesh, iXForm);
-	//output_points_and_normals<REAL, DIM>("points_normals.ply", points_normals, iXForm);
+	// output_points_and_normals<REAL, DIM>("points_normals.ply", points_normals, iXForm);
 }
 
 int main(int argc, char *argv[])
