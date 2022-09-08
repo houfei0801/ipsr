@@ -162,7 +162,8 @@ void ipsr(const string &input_name, const string &output_name, int iters, double
 	mesh = poisson_reconstruction<REAL, DIM>((int)argv_str.size(), argv_str.data(), points_normals, &weight_samples);
 
 	output_ply(output_name, mesh, iXForm);
-	// output_points_and_normals<REAL, DIM>("points_normals.ply", points_normals, iXForm);
+	// output_sample_points_and_normals<REAL, DIM>("points_normals.ply", points_normals, iXForm);
+	// output_all_points_and_normals<REAL, DIM>("points_normals.ply", input_name, points_normals, tree, iXForm);
 }
 
 int main(int argc, char *argv[])

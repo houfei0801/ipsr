@@ -30,8 +30,28 @@ DAMAGE.
 #include <string>
 #include <climits>
 #include <fstream>
+#include "kdtree.h"
 #include "PointStream.h"
 #include "PointStreamData.h"
+
+template <class Real, unsigned int Dim>
+void transform(std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, const XForm<Real, Dim + 1> &iXForm)
+{
+	for (size_t i = 0; i < points_normals.size(); ++i)
+	{
+		points_normals[i].first = iXForm * points_normals[i].first;
+	}
+}
+
+template <class Real, unsigned int Dim>
+void ply_reader(const std::string &file, std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals)
+{
+	PLYInputPointStream<Real, Dim> ply(file.c_str());
+	Normal<Real, Dim> n(Point<Real, Dim>(1, 0, 0));
+	Point<Real, Dim> p;
+	while (ply.nextPoint(p))
+		points_normals.push_back(std::make_pair(p, n));
+}
 
 template <class Real, unsigned int Dim>
 bool output_ply(const std::string &outFile, const std::pair<std::vector<Point<Real, Dim>>, std::vector<std::vector<int>>> &mesh, const XForm<Real, Dim + 1> &iXForm)
@@ -51,8 +71,8 @@ bool output_ply(const std::string &outFile, const std::pair<std::vector<Point<Re
 	plyfile << "ply\nformat ascii 1.0\n";
 	plyfile << "element vertex " << points.size() << std::endl;
 	plyfile << "property float x" << std::endl
-			<< "property float y" << std::endl
-			<< "property float z" << std::endl;
+		<< "property float y" << std::endl
+		<< "property float z" << std::endl;
 	plyfile << "element face " << faces.size() << std::endl;
 	plyfile << "property list uchar int vertex_index" << std::endl;
 	plyfile << "end_header" << std::endl;
@@ -75,7 +95,7 @@ bool output_ply(const std::string &outFile, const std::pair<std::vector<Point<Re
 }
 
 template <class Real, unsigned int Dim>
-bool output_points_and_normals(const std::string &outFile, const std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, const XForm<Real, Dim + 1> &iXForm)
+bool output_sample_points_and_normals(const std::string &outFile, const std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, const XForm<Real, Dim + 1> &iXForm)
 {
 	std::ofstream plyfile;
 	plyfile.open(outFile, std::ofstream::out);
@@ -89,11 +109,11 @@ bool output_points_and_normals(const std::string &outFile, const std::vector<std
 	plyfile << "ply\nformat ascii 1.0\n";
 	plyfile << "element vertex " << points_normals.size() << std::endl;
 	plyfile << "property float x" << std::endl
-			<< "property float y" << std::endl
-			<< "property float z" << std::endl;
+		<< "property float y" << std::endl
+		<< "property float z" << std::endl;
 	plyfile << "property float nx" << std::endl
-			<< "property float ny" << std::endl
-			<< "property float nz" << std::endl;
+		<< "property float ny" << std::endl
+		<< "property float nz" << std::endl;
 	plyfile << "element face 0" << std::endl;
 	plyfile << "property list uchar int vertex_index" << std::endl;
 	plyfile << "end_header" << std::endl;
@@ -109,13 +129,48 @@ bool output_points_and_normals(const std::string &outFile, const std::vector<std
 }
 
 template <class Real, unsigned int Dim>
-void ply_reader(const std::string &file, std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals)
+bool output_all_points_and_normals(const std::string &outFile, const std::string &input_name, const std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> &points_normals, const kdt::KDTree<kdt::KDTreePoint> &tree, const XForm<Real, Dim + 1> &iXForm)
 {
-	PLYInputPointStream<Real, Dim> ply(file.c_str());
-	Normal<Real, Dim> n(Point<Real, Dim>(1, 0, 0));
-	Point<Real, Dim> p;
-	while (ply.nextPoint(p))
-		points_normals.push_back(std::make_pair(p, n));
+	std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> points_normals_all;
+	ply_reader<Real, Dim>(input_name, points_normals_all);
+	transform<Real, Dim>(points_normals_all, iXForm.inverse());
+	for (size_t i = 0; i < points_normals_all.size(); ++i)
+	{
+		auto c = points_normals_all[i].first;
+		std::array<Real, Dim> a{ c[0], c[1], c[2] };
+		int n = tree.nnSearch(kdt::KDTreePoint(a));
+		points_normals_all[i].second = points_normals[n].second;
+	}
+
+	std::ofstream plyfile;
+	plyfile.open(outFile, std::ofstream::out);
+	if (!plyfile)
+	{
+		printf("Cannot save result file %s\n", outFile.c_str());
+		return false;
+	}
+	printf("writing to %s\n", outFile.c_str());
+
+	plyfile << "ply\nformat ascii 1.0\n";
+	plyfile << "element vertex " << points_normals_all.size() << std::endl;
+	plyfile << "property float x" << std::endl
+		<< "property float y" << std::endl
+		<< "property float z" << std::endl;
+	plyfile << "property float nx" << std::endl
+		<< "property float ny" << std::endl
+		<< "property float nz" << std::endl;
+	plyfile << "element face 0" << std::endl;
+	plyfile << "property list uchar int vertex_index" << std::endl;
+	plyfile << "end_header" << std::endl;
+
+	for (size_t i = 0; i < points_normals_all.size(); ++i)
+	{
+		Point<Real, Dim> p = iXForm * points_normals_all[i].first;
+		plyfile << p[0] << " " << p[1] << " " << p[2] << " ";
+		plyfile << points_normals_all[i].second.normal[0] << " " << points_normals_all[i].second.normal[1] << " " << points_normals_all[i].second.normal[2] << std::endl;
+	}
+	plyfile.close();
+	return true;
 }
 
 template <class Real, int Dim>
