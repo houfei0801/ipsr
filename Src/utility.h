@@ -120,7 +120,7 @@ bool output_sample_points_and_normals(const std::string &outFile, const std::vec
 
 	for (size_t i = 0; i < points_normals.size(); ++i)
 	{
-		Point<Real, Dim> p = iXForm * points_normals[i].first;
+		auto p = iXForm * points_normals[i].first;
 		plyfile << p[0] << " " << p[1] << " " << p[2] << " ";
 		plyfile << points_normals[i].second.normal[0] << " " << points_normals[i].second.normal[1] << " " << points_normals[i].second.normal[2] << std::endl;
 	}
@@ -133,10 +133,10 @@ bool output_all_points_and_normals(const std::string &outFile, const std::string
 {
 	std::vector<std::pair<Point<Real, Dim>, Normal<Real, Dim>>> points_normals_all;
 	ply_reader<Real, Dim>(input_name, points_normals_all);
-	transform<Real, Dim>(points_normals_all, iXForm.inverse());
+	auto inv_iXForm = iXForm.inverse();
 	for (size_t i = 0; i < points_normals_all.size(); ++i)
 	{
-		auto c = points_normals_all[i].first;
+		auto c = inv_iXForm * points_normals_all[i].first;
 		std::array<Real, Dim> a{ c[0], c[1], c[2] };
 		int n = tree.nnSearch(kdt::KDTreePoint(a));
 		points_normals_all[i].second = points_normals[n].second;
@@ -165,7 +165,7 @@ bool output_all_points_and_normals(const std::string &outFile, const std::string
 
 	for (size_t i = 0; i < points_normals_all.size(); ++i)
 	{
-		Point<Real, Dim> p = iXForm * points_normals_all[i].first;
+		const auto& p =  points_normals_all[i].first;
 		plyfile << p[0] << " " << p[1] << " " << p[2] << " ";
 		plyfile << points_normals_all[i].second.normal[0] << " " << points_normals_all[i].second.normal[1] << " " << points_normals_all[i].second.normal[2] << std::endl;
 	}
