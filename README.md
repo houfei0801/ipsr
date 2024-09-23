@@ -32,4 +32,4 @@ The depth parameter of screened Poisson surface reconstruction. It is the maximu
 The number of the closest sample points to search from every reconstructed triangle face. The suggested range is between 10 and 20. The default value of this parameter is 10.
 
 #### Parameters:
-The models in the data folder all could run with default parameters.
+The models in the data folder all could run with default parameters. Smaller depth helps with noisy points.
