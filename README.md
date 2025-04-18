@@ -7,7 +7,7 @@ Iterative Poisson Surface Reconstruction (iPSR) for Unoriented Points
 iPSR extends the popular Poisson Surface Reconstruction ([https://github.com/mkazhdan/PoissonRecon](https://github.com/mkazhdan/PoissonRecon)). iPSR has no more need of oriented normals as input, but infers the normals in an iterative manner. It is used to reconstruct surface from only points input.  
 [project page](https://lcs.ios.ac.cn/~houf/pages/ipsr/index.html)
 
-#### Our new work DWG improved iPSR. Please check it out [here](https://github.com/DWGTech/DWG).
+#### Our new work [DWG](https://dwgtech.github.io) improves iPSR. Please check out the code [here](https://github.com/DWGTech/DWG).
 
 ### Compilation:
 Windows: The code is tested by Visual Studio. The ipsr.vcxproj is an example to configure the project.  
