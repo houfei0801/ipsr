@@ -72,7 +72,7 @@ bool output_ply(const std::string &outFile, const std::pair<std::vector<Point<Re
 		<< "property float y" << std::endl
 		<< "property float z" << std::endl;
 	plyfile << "element face " << faces.size() << std::endl;
-	plyfile << "property list uchar int vertex_index" << std::endl;
+	plyfile << "property list uchar int vertex_indices" << std::endl;
 	plyfile << "end_header" << std::endl;
 
 	for (size_t i = 0; i < points.size(); ++i)
@@ -113,7 +113,7 @@ bool output_sample_points_and_normals(const std::string &outFile, const std::vec
 		<< "property float ny" << std::endl
 		<< "property float nz" << std::endl;
 	plyfile << "element face 0" << std::endl;
-	plyfile << "property list uchar int vertex_index" << std::endl;
+	plyfile << "property list uchar int vertex_indices" << std::endl;
 	plyfile << "end_header" << std::endl;
 
 	for (size_t i = 0; i < points_normals.size(); ++i)
@@ -158,7 +158,7 @@ bool output_all_points_and_normals(const std::string &outFile, const std::string
 		<< "property float ny" << std::endl
 		<< "property float nz" << std::endl;
 	plyfile << "element face 0" << std::endl;
-	plyfile << "property list uchar int vertex_index" << std::endl;
+	plyfile << "property list uchar int vertex_indices" << std::endl;
 	plyfile << "end_header" << std::endl;
 
 	for (size_t i = 0; i < points_normals_all.size(); ++i)
